@@ -33,7 +33,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             FallingShapesTheme {
-
                 FallingShapes()
             }
         }
@@ -44,6 +43,7 @@ class MainActivity : ComponentActivity() {
 fun FallingShapes() {
     var shapes by remember { mutableStateOf(emptyList<Shape>()) }
     val shapeList = listOf("circle", "triangle", "square", "pentagon", "hexagon")
+    val colorList = listOf(Color.Blue, Color.Magenta, Color.Yellow, Color.Green, Color.Red)
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -67,7 +67,8 @@ fun FallingShapes() {
                     shapes += Shape(
                         type = shapeList[Random.nextInt(0, shapeList.size)],
                         horizontalOffset = horizontalOffset,
-                        verticalOffset = verticalOffset
+                        verticalOffset = verticalOffset,
+                        color = colorList[Random.nextInt(0, colorList.size)]
                     )
                 },
                 modifier = Modifier.align(Alignment.BottomCenter)
@@ -94,7 +95,7 @@ private fun DrawCircleShape(circle:Shape) {
             .scale(shapeSize)
     ) {
         drawCircle(
-            color = Color.Red,
+            color = circle.color,
             center = Offset(circle.horizontalOffset, circle.verticalOffset),
             radius = 450F / 2
         )
@@ -128,7 +129,7 @@ private fun DrawTriangleShape(triangle:Shape) {
             .fillMaxSize()
             .scale(shapeSize)
     ) {
-        drawPath(path = trianglePath, color = Color.Magenta)
+        drawPath(path = trianglePath, color = triangle.color)
     }
 }
 
@@ -149,7 +150,7 @@ private fun DrawSquareShape(square:Shape) {
             .scale(shapeSize)
     ) {
         drawRect(
-            color = Color.Blue,
+            color = square.color,
             topLeft = Offset(square.horizontalOffset, square.verticalOffset),
             size = Size(450F, 450F)
         )
@@ -188,7 +189,7 @@ private fun DrawPentagonShape(pentagon:Shape) {
             .fillMaxSize()
             .scale(shapeSize)
     ) {
-        drawPath(path = pentagonPath, color = Color.Yellow)
+        drawPath(path = pentagonPath, color = pentagon.color)
     }
 }
 
@@ -224,14 +225,15 @@ private fun DrawHexagonShape(hexagon:Shape) {
             .fillMaxSize()
             .scale(shapeSize)
     ) {
-        drawPath(path = hexagonPath, color = Color.Green)
+        drawPath(path = hexagonPath, color = hexagon.color)
     }
 }
 data class Shape(
     val type: String,
     var visible: Boolean = false,
     val horizontalOffset: Float = 0F,
-    val verticalOffset: Float = 0F
+    val verticalOffset: Float = 0F,
+    val color: Color
 )
 
 @Preview(showBackground = true)
