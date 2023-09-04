@@ -21,8 +21,11 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.fallingshapes.ui.theme.FallingShapesTheme
+import kotlin.math.cos
+import kotlin.math.sin
 import kotlin.random.Random
 
 class MainActivity : ComponentActivity() {
@@ -40,7 +43,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun FallingShapes() {
     var shapes by remember { mutableStateOf(emptyList<Shape>()) }
-    val shapeList = listOf("circle", "square")
+    val shapeList = listOf("circle", "triangle", "square", "pentagon", "hexagon")
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -53,7 +56,10 @@ fun FallingShapes() {
             for (shape in shapes) {
                 when (shape.type) {
                     "circle" -> DrawCircleShape(shape)
+                    "triangle" -> DrawTriangleShape(shape)
                     "square" -> DrawSquareShape(shape)
+                    "pentagon" -> DrawPentagonShape(shape)
+                    "hexagon" -> DrawHexagonShape(shape)
                 }
             }
             Button(
@@ -94,12 +100,38 @@ private fun DrawCircleShape(circle:Shape) {
         )
     }
 }
-data class Shape(
-    val type: String,
-    var visible: Boolean = false,
-    val horizontalOffset: Float = 0F,
-    val verticalOffset: Float = 0F
-)
+
+@Composable
+private fun DrawTriangleShape(triangle:Shape) {
+    var updatedVisible by remember { mutableStateOf(triangle.visible) }
+
+    val shapeSize by animateFloatAsState(
+        targetValue = if (updatedVisible) 0F else 1F, label = "",
+        animationSpec = tween(1000)
+    )
+
+    val size = 450F * shapeSize
+
+    LaunchedEffect(triangle) {
+        updatedVisible = true
+    }
+    val trianglePath = Path().apply {
+        // Moves to top center position
+        moveTo(size / 2f + triangle.horizontalOffset, triangle.verticalOffset)
+        // Add line to bottom right corner
+        lineTo(size + triangle.horizontalOffset, size + triangle.verticalOffset)
+        // Add line to bottom left corner
+        lineTo(triangle.horizontalOffset, size +  triangle.verticalOffset)
+    }
+    Canvas(
+        modifier = Modifier
+            .fillMaxSize()
+            .scale(shapeSize)
+    ) {
+        drawPath(path = trianglePath, color = Color.Magenta)
+    }
+}
+
 @Composable
 private fun DrawSquareShape(square:Shape) {
     var updatedVisible by remember { mutableStateOf(square.visible) }
@@ -123,6 +155,84 @@ private fun DrawSquareShape(square:Shape) {
         )
     }
 }
+
+@Composable
+private fun DrawPentagonShape(pentagon:Shape) {
+    var updatedVisible by remember { mutableStateOf(pentagon.visible) }
+
+    val shapeSize by animateFloatAsState(
+        targetValue = if (updatedVisible) 0F else 1F, label = "",
+        animationSpec = tween(1000)
+    )
+
+    val size = 450F * shapeSize / 2
+    LaunchedEffect(pentagon) {
+        updatedVisible = true
+    }
+    val pentagonPath = Path().apply {
+        // Moves to top center position
+        moveTo(
+            x = size + pentagon.horizontalOffset + (size * cos(0.0)).toFloat(),
+            y = size + pentagon.verticalOffset + (size * sin(0.0)).toFloat()
+        )
+        for (i in 1..4) {
+            val angle = 2.0 * Math.PI / 5
+            lineTo(
+                x = size + pentagon.horizontalOffset + (size * cos(angle * i)).toFloat(),
+                y = size + pentagon.verticalOffset + (size * sin(angle * i)).toFloat()
+            )
+        }
+    }
+    Canvas(
+        modifier = Modifier
+            .fillMaxSize()
+            .scale(shapeSize)
+    ) {
+        drawPath(path = pentagonPath, color = Color.Yellow)
+    }
+}
+
+@Composable
+private fun DrawHexagonShape(hexagon:Shape) {
+    var updatedVisible by remember { mutableStateOf(hexagon.visible) }
+
+    val shapeSize by animateFloatAsState(
+        targetValue = if (updatedVisible) 0F else 1F, label = "",
+        animationSpec = tween(1000)
+    )
+
+    val size = 450F * shapeSize / 2
+    LaunchedEffect(hexagon) {
+        updatedVisible = true
+    }
+    val hexagonPath = Path().apply {
+        // Moves to top center position
+        moveTo(
+            x = size + hexagon.horizontalOffset + (size * cos(0.0)).toFloat(),
+            y = size + hexagon.verticalOffset + (size * sin(0.0)).toFloat()
+        )
+        for (i in 1..5) {
+            val angle = 2.0 * Math.PI / 6
+            lineTo(
+                x = size + hexagon.horizontalOffset + (size * cos(angle * i)).toFloat(),
+                y = size + hexagon.verticalOffset + (size * sin(angle * i)).toFloat()
+            )
+        }
+    }
+    Canvas(
+        modifier = Modifier
+            .fillMaxSize()
+            .scale(shapeSize)
+    ) {
+        drawPath(path = hexagonPath, color = Color.Green)
+    }
+}
+data class Shape(
+    val type: String,
+    var visible: Boolean = false,
+    val horizontalOffset: Float = 0F,
+    val verticalOffset: Float = 0F
+)
 
 @Preview(showBackground = true)
 @Composable
